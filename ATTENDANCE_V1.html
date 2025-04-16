@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Attendance System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background-color: #ffffff;
+            border: 1px solid #ff6200;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .table-dark {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        .table-dark th {
+            border-color: #ff6200;
+        }
+        .table tbody tr:hover {
+            background-color: #fff3e0;
+        }
+        .btn-custom {
+            background-color: #ff6200;
+            border-color: #ff6200;
+            color: #ffffff;
+            transition: background-color 0.3s;
+        }
+        .btn-custom:hover {
+            background-color: #e55b00;
+            border-color: #e55b00;
+        }
+        .btn-send {
+            background-color: #000000;
+            border: 2px solid #ff6200;
+            color: #ff6200;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-send:hover {
+            background-color: #ff6200;
+            border-color: #ff6200;
+            color: #000000;
+        }
+        .btn-history {
+            background-color: #000000;
+            border: 2px solid #ff6200;
+            color: #ff6200;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-history:hover {
+            background-color: #ff6200;
+            border-color: #ff6200;
+            color: #000000;
+        }
+        .btn-whatsapp {
+            background-color: #25D366;
+            border-color: #25D366;
+            color: #ffffff;
+            transition: background-color 0.3s;
+        }
+        .btn-whatsapp:hover {
+            background-color: #20B358;
+            border-color: #20B358;
+        }
+        .btn-logout {
+            background-color: #000000;
+            border: 2px solid #ff6200;
+            color: #ff6200;
+        }
+        .btn-logout:hover {
+            background-color: #ff6200;
+            border-color: #ff6200;
+            color: #000000;
+        }
+        .date-selector {
+            max-width: 200px;
+            margin-bottom: 1rem;
+        }
+        .header-controls {
+            display: grid;
+            grid-template-columns: 200px auto 150px;
+            align-items: flex-end;
+            margin-bottom: 1rem;
+        }
+        .send-report-container {
+            text-align: center;
+            margin-left: auto;
+        }
+        .search-container {
+            max-width: 300px;
+        }
+        .form-check-input {
+            cursor: pointer;
+            border-color: #000000;
+        }
+        .form-check-input:checked {
+            background-color: #ff6200;
+            border-color: #ff6200;
+        }
+        .time-display {
+            font-size: 0.8rem;
+            color: #000000;
+            margin-top: 0.2rem;
+        }
+        h1, h3 {
+            color: #ff6200;
+        }
+        .lead {
+            color: #000000;
+        }
+        .logo {
+            max-width: 120px;
+            margin: 1rem 0;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .btn-manage {
+            background-color: #000000;
+            border-color: #000000;
+            color: #ffffff;
+        }
+        .btn-manage:hover {
+            background-color: #333333;
+            border-color: #333333;
+        }
+        .unit-text {
+            color: #000000;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+        #pdfPreviewModal .modal-dialog {
+            max-width: 80%;
+        }
+        #pdfPreviewFrame {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ff6200;
+        }
+        #historyModal .modal-dialog {
+            max-width: 90%;
+        }
+        .date-range-container {
+            display: flex;
+            gap: 1rem;
+        }
+        .date-range-container .form-control {
+            max-width: 200px;
+        }
+        #loginContainer {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 2px solid #ff6200;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        #loginContainer h2 {
+            color: #ff6200;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #loginContainer .btn-custom {
+            width: 100%;
+        }
+        #loginContainer .btn-custom:disabled {
+            background-color: #cccccc;
+            border-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #mainContent {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .header-controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            .send-report-container {
+                margin-left: 0;
+            }
+            .date-range-container {
+                flex-direction: column;
+            }
+            #loginContainer {
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Container -->
+    <div id="loginContainer">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="passwordInput" class="form-label">Password</label>
+                <input type="password" class="form-control" id="passwordInput" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-custom" id="loginBtn">Login</button>
+        </form>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="container my-5">
+        <div class="header-container">
+            <img src="https://via.placeholder.com/120x40?text=Your+Logo" alt="Factory Logo" class="logo" id="pdfLogo">
+            <div>
+                <button class="btn btn-manage me-2" data-bs-toggle="modal" data-bs-target="#employeeModal">
+                    <i class="fas fa-users"></i> Employee Management
+                </button>
+                <button class="btn btn-custom me-2" id="exportBtn">
+                    <i class="fas fa-download"></i> Download Excel
+                </button>
+                <button class="btn btn-history me-2" data-bs-toggle="modal" data-bs-target="#historyModal">
+                    <i class="fas fa-history"></i> History
+                </button>
+                <button class="btn btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+        <header class="text-center mb-4">
+            <h1 class="display-4">Factory Attendance System</h1>
+            <p class="unit-text">Unit - 1</p>
+            <p class="lead">Track employee attendance</p>
+        </header>
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="card-title">Employee Attendance</h3>
+                </div>
+                <div class="header-controls">
+                    <div class="date-selector">
+                        <label for="dateSelect" class="form-label">Select Date:</label>
+                        <input type="date" id="dateSelect" class="form-control" value="">
+                    </div>
+                    <div class="send-report-container">
+                        <button class="btn btn-send" id="sendReportBtn">
+                            <i class="fas fa-envelope"></i> Send Report
+                        </button>
+                    </div>
+                </div>
+                <div class="search-container mb-3">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by ID or Name">
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="attendanceTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>In Time</th>
+                                <th>Out Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeData">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Management Modal -->
+        <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="employeeModalLabel">Employee Management</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6>Add New Employee</h6>
+                        <form id="employeeForm" class="mb-4">
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="empId" placeholder="ID (e.g., E004)" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="empName" placeholder="Name" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" id="empDept" placeholder="Department" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-custom w-100">Add Employee</button>
+                                </div>
+                            </div>
+                        </form>
+                        <h6>Employee List</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="manageEmployeeData">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Modal -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">Attendance History</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="date-range-container">
+                                    <div>
+                                        <label for="historyFromDate" class="form-label">From Date:</label>
+                                        <input type="date" id="historyFromDate" class="form-control">
+                                    </div>
+                                    <div>
+                                        <label for="historyToDate" class="form-label">To Date:</label>
+                                        <input type="date" id="historyToDate" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="historyEmployeeSelect" class="form-label">Select Employee:</label>
+                                <select id="historyEmployeeSelect" class="form-control">
+                                    <option value="">All Employees</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="historyTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Attendance</th>
+                                        <th>In Time</th>
+                                        <th>Out Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyData">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button class="btn btn-custom me-2" id="downloadHistoryExcelBtn">
+                                <i class="fas fa-download"></i> Download Excel
+                            </button>
+                            <button class="btn btn-custom" id="downloadHistoryPdfBtn">
+                                <i class="fas fa-file-pdf"></i> Download PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PDF Preview Modal -->
+        <div class="modal fade" id="pdfPreviewModal" tabindex="-1" aria-labelledby="pdfPreviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="pdfPreviewModalLabel">Attendance Report Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="whatsappNumber" class="form-label">WhatsApp Number (e.g., +1234567890):</label>
+                            <input type="tel" id="whatsappNumber" class="form-control" placeholder="+1234567890">
+                        </div>
+                        <iframe id="pdfPreviewFrame" style="width: 100%; height: 500px; border: 1px solid #ff6200;"></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelPdfBtn">Cancel</button>
+                        <button type="button" class="btn btn-custom" id="downloadPdfBtn">Download</button>
+                        <button type="button" class="btn btn-custom" id="sendPdfBtn">Send via Email</button>
+                        <button type="button" class="btn btn-whatsapp" id="sendWhatsappBtn"><i class="fab fa-whatsapp"></i> Send via WhatsApp</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SheetJS for Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- FileSaver.js for reliable download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        // Password Check
+        const correctPassword = 'pass123'; // Change this to your desired password
+
+        function toggleLoginState(isLoggedIn) {
+            const loginContainer = document.getElementById('loginContainer');
+            const mainContent = document.getElementById('mainContent');
+            const loginBtn = document.getElementById('loginBtn');
+            if (isLoggedIn) {
+                loginContainer.style.display = 'none';
+                mainContent.style.display = 'block';
+                if (loginBtn) loginBtn.disabled = false;
+            } else {
+                loginContainer.style.display = 'block';
+                mainContent.style.display = 'none';
+                if (loginBtn) loginBtn.disabled = false;
+            }
+        }
+
+        function checkLogin() {
+            try {
+                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                console.log('Checking login state:', isLoggedIn);
+                toggleLoginState(isLoggedIn);
+            } catch (error) {
+                console.error('Error checking login:', error);
+                toggleLoginState(false);
+            }
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const loginBtn = document.getElementById('loginBtn');
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Logging in...';
+                const password = document.getElementById('passwordInput').value.toLowerCase();
+                console.log('Password entered:', password);
+                if (password === correctPassword.toLowerCase()) {
+                    console.log('Password correct, logging in');
+                    localStorage.setItem('isLoggedIn', 'true');
+                    toggleLoginState(true);
+                } else {
+                    console.log('Incorrect password');
+                    alert('Incorrect password. Please try again.');
+                    document.getElementById('passwordInput').value = '';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login';
+                }
+            });
+        }
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                console.log('Logging out');
+                localStorage.removeItem('isLoggedIn');
+                checkLogin();
+            });
+        }
+
+        // Initialize EmailJS
+        (function(){
+            emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
+        })();
+
+        // Employee data with history
+        let employees = [
+            {
+                id: "E001",
+                name: "John Doe",
+                department: "Production",
+                history: [
+                    { date: "2025-04-15", attendance: "Present", inTime: "9:00 AM", outTime: "" },
+                    { date: "2025-04-14", attendance: "Present", inTime: "8:50 AM", outTime: "5:00 PM" }
+                ]
+            },
+            {
+                id: "E002",
+                name: "Jane Smith",
+                department: "Quality Control",
+                history: [
+                    { date: "2025-04-15", attendance: "Absent", inTime: "", outTime: "" },
+                    { date: "2025-04-14", attendance: "Present", inTime: "9:15 AM", outTime: "4:30 PM" }
+                ]
+            },
+            {
+                id: "E003",
+                name: "Mike Johnson",
+                department: "Maintenance",
+                history: [
+                    { date: "2025-04-15", attendance: "Present", inTime: "9:30 AM", outTime: "5:30 PM" },
+                    { date: "2025-04-14", attendance: "Absent", inTime: "", outTime: "" }
+                ]
+            }
+        ];
+
+        // Load employees from localStorage
+        try {
+            const savedEmployees = localStorage.getItem('employees');
+            if (savedEmployees) {
+                const parsed = JSON.parse(savedEmployees);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    const validEmployees = parsed.filter(emp =>
+                        emp && typeof emp === 'object' &&
+                        emp.id && typeof emp.id === 'string' &&
+                        emp.name && typeof emp.name === 'string' &&
+                        emp.department && typeof emp.department === 'string' &&
+                        Array.isArray(emp.history)
+                    );
+                    if (validEmployees.length > 0) {
+                        employees = validEmployees;
+                    } else {
+                        console.warn('Invalid employee data in localStorage, using default.');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load employees:', error);
+        }
+
+        // Save employees to localStorage
+        function saveEmployees() {
+            try {
+                localStorage.setItem('employees', JSON.stringify(employees));
+            } catch (error) {
+                console.error('Failed to save employees:', error);
+            }
+        }
+
+        // Initialize UI
+        function initializeUI() {
+            if (localStorage.getItem('isLoggedIn') !== 'true') return;
+            const dateSelect = document.getElementById('dateSelect');
+            const today = new Date().toISOString().slice(0, 10);
+            dateSelect.value = today;
+            populateTable();
+            populateManageTable();
+            populateHistoryEmployeeSelect();
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    populateTable();
+                });
+            }
+            const historyFromDate = document.getElementById('historyFromDate');
+            const historyToDate = document.getElementById('historyToDate');
+            const historyEmployeeSelect = document.getElementById('historyEmployeeSelect');
+            if (historyFromDate && historyToDate && historyEmployeeSelect) {
+                historyFromDate.addEventListener('change', validateAndPopulateHistory);
+                historyToDate.addEventListener('change', validateAndPopulateHistory);
+                historyEmployeeSelect.addEventListener('change', populateHistoryTable);
+            }
+        }
+
+        // Run login check and initialize UI
+        checkLogin();
+        initializeUI();
+
+        // Validate date range and populate history
+        function validateAndPopulateHistory() {
+            const fromDate = document.getElementById('historyFromDate').value;
+            const toDate = document.getElementById('historyToDate').value;
+            if (fromDate && toDate && new Date(toDate) < new Date(fromDate)) {
+                alert('To Date cannot be earlier than From Date.');
+                document.getElementById('historyToDate').value = '';
+                return;
+            }
+            populateHistoryTable();
+        }
+
+        // Search employees
+        function filterEmployees(query) {
+            query = query.toLowerCase().trim();
+            if (!query) return employees;
+            return employees.filter(emp =>
+                emp.id.toLowerCase().includes(query) ||
+                emp.name.toLowerCase().includes(query)
+            );
+        }
+
+        // Populate attendance table
+        function populateTable() {
+            const tbody = document.getElementById('employeeData');
+            if (!tbody) {
+                console.error('Employee table body missing.');
+                return;
+            }
+            const searchQuery = document.getElementById('searchInput')?.value || '';
+            const filteredEmployees = filterEmployees(searchQuery);
+            const currentDate = document.getElementById('dateSelect').value || new Date().toISOString().slice(0, 10);
+            tbody.innerHTML = '';
+            filteredEmployees.forEach(employee => {
+                const historyEntry = employee.history.find(h => h.date === currentDate) || {
+                    attendance: 'Absent',
+                    inTime: '',
+                    outTime: ''
+                };
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${employee.id}</td>
+                    <td>${employee.name}</td>
+                    <td>${employee.department}</td>
+                    <td>
+                        <div>
+                            <input type="checkbox" class="form-check-input in-time-check" data-id="${employee.id}"
+                                ${historyEntry.attendance === 'Present' ? 'checked' : ''}>
+                            <div class="time-display in-time-display">${historyEntry.inTime}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="checkbox" class="form-check-input out-time-check" data-id="${employee.id}"
+                                ${historyEntry.outTime ? 'checked' : ''}>
+                            <div class="time-display out-time-display">${historyEntry.outTime}</div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.querySelectorAll('.in-time-check').forEach(checkbox => {
+                checkbox.addEventListener('change', handleCheckboxChange);
+            });
+            document.querySelectorAll('.out-time-check').forEach(checkbox => {
+                checkbox.addEventListener('change', handleCheckboxChange);
+            });
+        }
+
+        // Handle checkbox changes
+        function handleCheckboxChange(e) {
+            const id = e.target.dataset.id;
+            const isInTime = e.target.classList.contains('in-time-check');
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+
+            const currentDate = document.getElementById('dateSelect').value || new Date().toISOString().slice(0, 10);
+            let historyEntry = employee.history.find(h => h.date === currentDate);
+            if (!historyEntry) {
+                historyEntry = { date: currentDate, attendance: 'Absent', inTime: '', outTime: '' };
+                employee.history.push(historyEntry);
+            }
+
+            const inTimeCheckbox = document.querySelector(`.in-time-check[data-id="${id}"]`);
+            const outTimeCheckbox = document.querySelector(`.out-time-check[data-id="${id}"]`);
+            const inTimeDisplay = inTimeCheckbox?.parentElement.querySelector('.in-time-display');
+            const outTimeDisplay = outTimeCheckbox?.parentElement.querySelector('.out-time-display');
+
+            const currentTime = new Date().toLocaleTimeString([], {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            if (isInTime) {
+                if (e.target.checked) {
+                    historyEntry.attendance = 'Present';
+                    historyEntry.inTime = currentTime;
+                    inTimeDisplay.textContent = historyEntry.inTime;
+                } else {
+                    historyEntry.attendance = 'Absent';
+                    historyEntry.inTime = '';
+                    historyEntry.outTime = '';
+                    inTimeDisplay.textContent = '';
+                    outTimeDisplay.textContent = '';
+                    outTimeCheckbox.checked = false;
+                }
+            } else {
+                if (e.target.checked && historyEntry.attendance === 'Present') {
+                    historyEntry.outTime = currentTime;
+                    outTimeDisplay.textContent = historyEntry.outTime;
+                } else {
+                    historyEntry.outTime = '';
+                    outTimeDisplay.textContent = '';
+                    outTimeCheckbox.checked = false;
+                }
+            }
+
+            saveEmployees();
+            populateTable();
+        }
+
+        // Populate employee management table
+        function populateManageTable() {
+            const tbody = document.getElementById('manageEmployeeData');
+            if (!tbody) {
+                console.error('Manage employee table body missing.');
+                return;
+            }
+            tbody.innerHTML = '';
+            employees.forEach(employee => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${employee.id}</td>
+                    <td>${employee.name}</td>
+                    <td>${employee.department}</td>
+                    <td>
+                        <button class="btn btn-custom btn-sm me-1 edit-btn" data-id="${employee.id}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${employee.id}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', handleEditEmployee);
+            });
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', handleDeleteEmployee);
+            });
+        }
+
+        // Handle add employee
+        const employeeForm = document.getElementById('employeeForm');
+        if (employeeForm) {
+            employeeForm.addEventListener('submit', e => {
+                e.preventDefault();
+                const id = document.getElementById('empId')?.value.trim();
+                const name = document.getElementById('empName')?.value.trim();
+                const dept = document.getElementById('empDept')?.value.trim();
+
+                if (!id || !name || !dept) {
+                    alert('Please fill all fields.');
+                    return;
+                }
+
+                if (employees.some(emp => emp.id === id)) {
+                    alert('ID already exists. Use a unique ID.');
+                    return;
+                }
+
+                employees.push({
+                    id: id,
+                    name: name,
+                    department: dept,
+                    history: []
+                });
+
+                saveEmployees();
+                employeeForm.reset();
+                populateTable();
+                populateManageTable();
+                populateHistoryEmployeeSelect();
+            });
+        } else {
+            console.error('Employee form missing.');
+        }
+
+        // Handle edit employee
+        function handleEditEmployee(e) {
+            const id = e.target.closest('.edit-btn').dataset.id;
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) {
+                console.error('Employee not found:', id);
+                return;
+            }
+
+            const empIdInput = document.getElementById('empId');
+            const empNameInput = document.getElementById('empName');
+            const empDeptInput = document.getElementById('empDept');
+
+            if (!empIdInput || !empNameInput || !empDeptInput) {
+                console.error('Form inputs missing.');
+                return;
+            }
+
+            empIdInput.value = employee.id;
+            empNameInput.value = employee.name;
+            empDeptInput.value = employee.department;
+
+            const form = document.getElementById('employeeForm');
+            const originalSubmit = form.onsubmit;
+            form.onsubmit = e => {
+                e.preventDefault();
+                const newId = empIdInput.value.trim();
+                const newName = empNameInput.value.trim();
+                const newDept = empDeptInput.value.trim();
+
+                if (!newId || !newName || !newDept) {
+                    alert('All fields are required.');
+                    return;
+                }
+
+                if (newId !== employee.id && employees.some(emp => emp.id === newId)) {
+                    alert('ID already exists. Use a unique ID.');
+                    return;
+                }
+
+                employee.id = newId;
+                employee.name = newName;
+                employee.department = newDept;
+
+                saveEmployees();
+                form.reset();
+                form.onsubmit = originalSubmit;
+                populateTable();
+                populateManageTable();
+                populateHistoryEmployeeSelect();
+            };
+        }
+
+        // Handle delete employee
+        function handleDeleteEmployee(e) {
+            const id = e.target.closest('.delete-btn').dataset.id;
+            if (confirm(`Are you sure you want to delete employee ${id}?`)) {
+                employees = employees.filter(emp => emp.id !== id);
+                saveEmployees();
+                populateTable();
+                populateManageTable();
+                populateHistoryEmployeeSelect();
+            }
+        }
+
+        // Populate history employee select
+        function populateHistoryEmployeeSelect() {
+            const select = document.getElementById('historyEmployeeSelect');
+            if (!select) return;
+            select.innerHTML = '<option value="">All Employees</option>';
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = `${emp.id} - ${emp.name}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Populate history table
+        function populateHistoryTable() {
+            const tbody = document.getElementById('historyData');
+            if (!tbody) {
+                console.error('History table body missing.');
+                return;
+            }
+            const fromDate = document.getElementById('historyFromDate').value;
+            const toDate = document.getElementById('historyToDate').value;
+            const employeeFilter = document.getElementById('historyEmployeeSelect').value;
+            tbody.innerHTML = '';
+
+            let filteredHistory = [];
+            employees.forEach(emp => {
+                if (employeeFilter && emp.id !== employeeFilter) return;
+                emp.history.forEach(h => {
+                    if (fromDate && toDate) {
+                        const recordDate = new Date(h.date);
+                        const startDate = new Date(fromDate);
+                        const endDate = new Date(toDate);
+                        if (recordDate < startDate || recordDate > endDate) return;
+                    } else if (fromDate && h.date < fromDate) {
+                        return;
+                    } else if (toDate && h.date > toDate) {
+                        return;
+                    }
+                    filteredHistory.push({
+                        date: h.date,
+                        id: emp.id,
+                        name: emp.name,
+                        department: emp.department,
+                        attendance: h.attendance,
+                        inTime: h.inTime,
+                        outTime: h.outTime
+                    });
+                });
+            });
+
+            filteredHistory.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.id}</td>
+                    <td>${record.name}</td>
+                    <td>${record.department}</td>
+                    <td>${record.attendance}</td>
+                    <td>${record.inTime}</td>
+                    <td>${record.outTime}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Generate Excel report
+        function generateExcelReport(data, filename) {
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const range = XLSX.utils.decode_range(worksheet['!ref']);
+            for (let row = range.s.r + 1; row <= range.e.r; row++) {
+                const cellAddress = XLSX.utils.encode_cell({ r: row, c: 4 });
+                const cell = worksheet[cellAddress];
+                if (cell && cell.v === 'Absent') {
+                    for (let col = 0; col <= range.e.c; col++) {
+                        const targetCellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                        if (!worksheet[targetCellAddress]) continue;
+                        worksheet[targetCellAddress].s = {
+                            fill: {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { rgb: 'FF9999' }
+                            }
+                        };
+                    }
+                }
+            }
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            return { blob: new Blob([excelBuffer], { type: 'application/octet-stream' }), filename };
+        }
+
+        // Download history Excel
+        document.getElementById('downloadHistoryExcelBtn')?.addEventListener('click', () => {
+            const fromDate = document.getElementById('historyFromDate').value;
+            const toDate = document.getElementById('historyToDate').value;
+            const employeeFilter = document.getElementById('historyEmployeeSelect').value;
+            let filteredHistory = [];
+            employees.forEach(emp => {
+                if (employeeFilter && emp.id !== employeeFilter) return;
+                emp.history.forEach(h => {
+                    if (fromDate && toDate) {
+                        const recordDate = new Date(h.date);
+                        const startDate = new Date(fromDate);
+                        const endDate = new Date(toDate);
+                        if (recordDate < startDate || recordDate > endDate) return;
+                    } else if (fromDate && h.date < fromDate) {
+                        return;
+                    } else if (toDate && h.date > toDate) {
+                        return;
+                    }
+                    filteredHistory.push({
+                        Date: h.date,
+                        ID: emp.id,
+                        Name: emp.name,
+                        Department: emp.department,
+                        Attendance: h.attendance,
+                        'In Time': h.inTime,
+                        'Out Time': h.outTime
+                    });
+                });
+            });
+
+            if (filteredHistory.length === 0) {
+                alert('No data to export.');
+                return;
+            }
+
+            const datePart = fromDate && toDate ? `${fromDate}_to_${toDate}` : fromDate ? `from_${fromDate}` : toDate ? `to_${toDate}` : 'all';
+            const filename = `attendance_${datePart}_${employeeFilter || 'all'}.xlsx`;
+            try {
+                const { blob, filename: finalFilename } = generateExcelReport(filteredHistory, filename);
+                saveAs(blob, finalFilename);
+            } catch (error) {
+                console.error('Excel error:', error);
+                alert('Failed to download Excel. Check Console (F12) for details.');
+            }
+        });
+
+        // Load image for PDF
+        async function loadImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = url;
+            });
+        }
+
+        // Generate PDF report
+        async function generatePdfReport(data, title, dateRange) {
+            try {
+                await waitForLibraries();
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) throw new Error('jsPDF not loaded');
+                const doc = new jsPDF();
+
+                // Logo
+                try {
+                    const logoUrl = document.getElementById('pdfLogo').src;
+                    const logoImg = await loadImage(logoUrl);
+                    const imgProps = doc.getImageProperties(logoImg);
+                    const imgWidth = 40;
+                    const imgHeight = (imgProps.height / imgProps.width) * imgWidth;
+                    doc.addImage(logoImg, 'PNG', 10, 10, imgWidth, imgHeight);
+                } catch (error) {
+                    console.warn('Failed to add logo to PDF:', error);
+                    doc.setTextColor(255, 0, 0);
+                    doc.setFontSize(10);
+                    doc.text('Logo unavailable', 10, 10);
+                }
+
+                // Header
+                doc.setFillColor(255, 98, 0);
+                doc.rect(0, 30, 210, 15, 'F');
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(16);
+                doc.text(title, 105, 38, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text(`Date Range: ${dateRange || 'All'}`, 105, 43, { align: 'center' });
+
+                // Decorative line
+                doc.setDrawColor(255, 98, 0);
+                doc.setLineWidth(0.5);
+                doc.line(10, 48, 200, 48);
+
+                // Summary
+                const validData = data.filter(d =>
+                    d && d.ID && typeof d.ID === 'string' &&
+                    d.Name && typeof d.Name === 'string' &&
+                    d.Department && typeof d.Department === 'string'
+                );
+                const totalRecords = validData.length;
+                const presentCount = validData.filter(d => d.Attendance === 'Present').length;
+                const absentCount = validData.filter(d => d.Attendance === 'Absent').length;
+
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(12);
+                if (totalRecords === 0) {
+                    doc.text('No records found.', 20, 60);
+                    return doc;
+                }
+                doc.text(`Total Records: ${totalRecords}`, 20, 60);
+                doc.text(`Present: ${presentCount}`, 20, 70);
+                doc.text(`Absent: ${absentCount}`, 20, 80);
+
+                // Departments
+                let y = 100;
+                const departments = [...new Set(validData.map(d => d.Department).filter(d => d && typeof d === 'string'))];
+                if (departments.length === 0) {
+                    doc.text('No department data.', 20, y);
+                    return doc;
+                }
+
+                for (const dept of departments) {
+                    const deptData = validData.filter(d => d.Department === dept);
+                    const deptPresent = deptData.filter(d => d.Attendance === 'Present').length;
+                    const deptAbsent = deptData.filter(d => d.Attendance === 'Absent').length;
+
+                    // Department border
+                    doc.setDrawColor(255, 98, 0);
+                    doc.setLineWidth(0.2);
+                    doc.rect(15, y, 180, 50);
+
+                    doc.setFillColor(0, 0, 0);
+                    doc.rect(20, y + 5, 170, 10, 'F');
+                    doc.setTextColor(255, 98, 0);
+                    doc.setFontSize(12);
+                    doc.text(`Department: ${dept}`, 25, y + 12);
+                    doc.setTextColor(0, 0, 0);
+                    y += 20;
+                    doc.text(`Total: ${deptData.length}`, 25, y);
+                    doc.text(`Present: ${deptPresent}`, 25, y + 10);
+                    doc.text(`Absent: ${deptAbsent}`, 25, y + 20);
+                    y += 40;
+
+                    if (y > 240) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                }
+
+                return doc;
+            } catch (error) {
+                console.error('generatePdfReport failed:', error);
+                throw error;
+            }
+        }
+
+        // Download history PDF
+        document.getElementById('downloadHistoryPdfBtn')?.addEventListener('click', async () => {
+            const fromDate = document.getElementById('historyFromDate').value;
+            const toDate = document.getElementById('historyToDate').value;
+            const employeeFilter = document.getElementById('historyEmployeeSelect').value;
+            let filteredHistory = [];
+            employees.forEach(emp => {
+                if (employeeFilter && emp.id !== employeeFilter) return;
+                emp.history.forEach(h => {
+                    if (fromDate && toDate) {
+                        const recordDate = new Date(h.date);
+                        const startDate = new Date(fromDate);
+                        const endDate = new Date(toDate);
+                        if (recordDate < startDate || recordDate > endDate) return;
+                    } else if (fromDate && h.date < fromDate) {
+                        return;
+                    } else if (toDate && h.date > toDate) {
+                        return;
+                    }
+                    filteredHistory.push({
+                        Date: h.date,
+                        ID: emp.id,
+                        Name: emp.name,
+                        Department: emp.department,
+                        Attendance: h.attendance,
+                        'In Time': h.inTime,
+                        'Out Time': h.outTime
+                    });
+                });
+            });
+
+            if (filteredHistory.length === 0) {
+                alert('No data to export.');
+                return;
+            }
+
+            const datePart = fromDate && toDate ? `${fromDate} to ${toDate}` : fromDate ? `From ${fromDate}` : toDate ? `To ${toDate}` : 'All';
+            const title = employeeFilter ? `Attendance Report - ${employeeFilter}` : 'Attendance Report';
+            const filename = `attendance_${fromDate || 'all'}_to_${toDate || 'all'}_${employeeFilter || 'all'}.pdf`;
+            try {
+                const doc = await generatePdfReport(filteredHistory, title, datePart);
+                doc.save(filename);
+            } catch (error) {
+                console.error('History PDF error:', error);
+                alert('Failed to download PDF. Check Console (F12) for details.');
+            }
+        });
+
+        // Generate Excel report for current date
+        function generateExcelReportCurrent() {
+            const date = document.getElementById('dateSelect').value || new Date().toISOString().slice(0, 10);
+            const data = employees.map(emp => {
+                const historyEntry = emp.history.find(h => h.date === date) || {
+                    attendance: 'Absent',
+                    inTime: '',
+                    outTime: ''
+                };
+                return {
+                    ID: emp.id,
+                    Name: emp.name,
+                    Department: emp.department,
+                    Attendance: historyEntry.attendance,
+                    'In Time': historyEntry.inTime,
+                    'Out Time': historyEntry.outTime,
+                    Date: date
+                };
+            });
+            return generateExcelReport(data, `attendance_${date}.xlsx`);
+        }
+
+        // Generate PDF report for current date
+        async function generatePdfReportCurrent() {
+            const date = document.getElementById('dateSelect').value || new Date().toISOString().slice(0, 10);
+            const data = employees.map(emp => {
+                const historyEntry = emp.history.find(h => h.date === date) || {
+                    attendance: 'Absent',
+                    inTime: '',
+                    outTime: ''
+                };
+                return {
+                    ID: emp.id,
+                    Name: emp.name,
+                    Department: emp.department,
+                    Attendance: historyEntry.attendance,
+                    'In Time': historyEntry.inTime,
+                    'Out Time': historyEntry.outTime,
+                    Date: date
+                };
+            });
+            return generatePdfReport(data, 'Factory Attendance Report', date);
+        }
+
+        // Generate WhatsApp message
+        function generateWhatsappMessage(data, date) {
+            const totalRecords = data.length;
+            const presentCount = data.filter(d => d.Attendance === 'Present').length;
+            const absentCount = data.filter(d => d.Attendance === 'Absent').length;
+            return `Attendance Report for ${date}\nTotal Employees: ${totalRecords}\nPresent: ${presentCount}\nAbsent: ${absentCount}`;
+        }
+
+        // Wait for libraries
+        async function waitForLibraries() {
+            let attempts = 0;
+            const maxAttempts = 20;
+            while (attempts < maxAttempts) {
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+                attempts++;
+            }
+            throw new Error('jsPDF failed to load after max attempts.');
+        }
+
+        // Preview PDF
+        document.getElementById('sendReportBtn')?.addEventListener('click', async () => {
+            try {
+                const doc = await generatePdfReportCurrent();
+                const pdfBlob = doc.output('blob');
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                const modal = new bootstrap.Modal(document.getElementById('pdfPreviewModal'));
+                const pdfFrame = document.getElementById('pdfPreviewFrame');
+
+                pdfFrame.src = pdfUrl;
+                modal.show();
+
+                document.getElementById('downloadPdfBtn').onclick = () => {
+                    const date = document.getElementById('dateSelect').value || new Date().toISOString().slice(0, 10);
+                    doc.save(`attendance_${date}.pdf`);
+                };
+
+                document.getElementById('sendPdfBtn').onclick = () => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const base64Data = e.target.result.split(',')[1];
+                        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+                            to_email: "YOUR_EMAIL_ADDRESS",
+                            attachment: base64Data,
+                            filename: `attendance_${new Date().toISOString().slice(0, 10)}.pdf`,
+                            subject: `Attendance Report - ${new Date().toISOString().slice(0, 10)}`,
+                            message: "Please find the attendance report attached."
+                        }).then(
+                            () => {
+                                alert('Report sent successfully via email!');
+                                modal.hide();
+                            },
+                            (error) => {
+                                console.error('Email error:', error);
+                                alert('Failed to send report via email. Check Console (F12) for details.');
+                            }
+                        );
+                    };
+                    reader.onerror = (err) => {
+                        console.error('Blob read error:', err);
+                        alert('Failed to prepare email. Check Console (F12).');
+                    };
+                    reader.readAsDataURL(pdfBlob);
+                };
+
+                document.getElementById('sendWhatsappBtn').onclick = () => {
+                    const phoneNumber = document.getElementById('whatsappNumber').value.trim();
+                    if (!phoneNumber || !/^\+\d{10,15}$/.test(phoneNumber)) {
+                        alert('Please enter a valid phone number (e.g., +1234567890).');
+                        return;
+                    }
+                    const date = document.getElementById('dateSelect').value || new Date().toISOString().slice(0, 10);
+                    const data = employees.map(emp => {
+                        const historyEntry = emp.history.find(h => h.date === date) || {
+                            attendance: 'Absent',
+                            inTime: '',
+                            outTime: ''
+                        };
+                        return {
+                            ID: emp.id,
+                            Name: emp.name,
+                            Department: emp.department,
+                            Attendance: historyEntry.attendance,
+                            'In Time': historyEntry.inTime,
+                            'Out Time': historyEntry.outTime,
+                            Date: date
+                        };
+                    });
+                    const message = generateWhatsappMessage(data, date);
+                    const encodedMessage = encodeURIComponent(message);
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+                    window.open(whatsappUrl, '_blank');
+                    modal.hide();
+                };
+
+                document.getElementById('cancelPdfBtn').onclick = () => {
+                    modal.hide();
+                    pdfFrame.src = '';
+                    URL.revokeObjectURL(pdfUrl);
+                };
+            } catch (error) {
+                console.error('Send Report error:', error);
+                alert('Failed to generate PDF preview. Check Console (F12) for details.');
+            }
+        });
+
+        // Download Excel
+        document.getElementById('exportBtn')?.addEventListener('click', () => {
+            try {
+                const { blob, filename } = generateExcelReportCurrent();
+                saveAs(blob, filename);
+            } catch (error) {
+                console.error('Excel error:', error);
+                alert('Failed to download Excel. Check Console (F12) for details.');
+            }
+        });
+    </script>
+</body>
+</html>
